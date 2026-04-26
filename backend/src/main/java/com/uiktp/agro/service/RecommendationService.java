@@ -8,6 +8,7 @@ import com.uiktp.agro.model.Parcel;
 import com.uiktp.agro.model.Recommendation;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -15,14 +16,17 @@ public class RecommendationService {
     private final ClimateService climateService;
     private final CropSuitabilityService cropSuitabilityService;
     private final ObjectMapper objectMapper;
+    private final MlInferenceClient mlInferenceClient;
 
     public RecommendationService(
             ClimateService climateService,
             CropSuitabilityService cropSuitabilityService,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            MlInferenceClient mlInferenceClient) {
         this.climateService = climateService;
         this.cropSuitabilityService = cropSuitabilityService;
         this.objectMapper = objectMapper;
+        this.mlInferenceClient = mlInferenceClient;
     }
 
     public Recommendation generate(Parcel parcel) {
@@ -60,30 +64,49 @@ public class RecommendationService {
             risk = "LOW";
         }
 
-        List<CropRanking> top = cropSuitabilityService.topRankings(data, parcel.getSoilType(), risk, 3);
-        if (top.isEmpty()) {
-            rec.setSuggestedCrop("Пченица");
-            rec.setExpectedYieldTonPerHa(4.0);
-        } else {
-            CropRanking first = top.get(0);
-            rec.setSuggestedCrop(first.cropName());
-            rec.setExpectedYieldTonPerHa(first.expectedYieldTonPerHa());
-            try {
-                rec.setCropRankingsJson(objectMapper.writeValueAsString(top));
-            } catch (Exception e) {
-                rec.setCropRankingsJson(null);
+        // Data-driven ML inference (no rule-based crop scoring). Candidate crops for v1.
+        List<String> candidates = List.of("wheat", "maize", "sunflower", "barley", "tomato", "pepper_green");
+        try {
+            var ml = mlInferenceClient.recommend(parcel, data, candidates);
+            rec.setMlOutputJson(objectMapper.writeValueAsString(ml));
+            var ranked = ml.get("rankedCrops");
+            if (ranked != null && ranked.isArray() && ranked.size() > 0) {
+                var first = ranked.get(0);
+                String cropId = first.path("cropId").asText("wheat");
+                double y = first.path("expectedYieldTonPerHa").asDouble(0.0);
+                rec.setSuggestedCrop(cropId);
+                rec.setExpectedYieldTonPerHa(y);
+                // Also populate cropRankingsJson for existing UI by mapping to CropRanking-like shape.
+                List<CropRanking> mapped = new ArrayList<>();
+                int rank = 1;
+                for (var node : ranked) {
+                    mapped.add(new CropRanking(
+                            rank++,
+                            node.path("cropId").asText(),
+                            (int) Math.round(node.path("suitabilityScore").asDouble(0.0)),
+                            node.path("expectedYieldTonPerHa").asDouble(0.0),
+                            risk
+                    ));
+                    if (rank > 6) break;
+                }
+                rec.setCropRankingsJson(objectMapper.writeValueAsString(mapped));
+            } else {
+                rec.setSuggestedCrop("wheat");
+                rec.setExpectedYieldTonPerHa(0.0);
             }
+        } catch (Exception e) {
+            // ML is required for correct output. Bubble up a clear error so we don't silently fall back to 0.0.
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_GATEWAY,
+                    "ML service unavailable or failed. Start the ML inference service and ensure agro.ml.base-url is reachable.",
+                    e
+            );
         }
         rec.setRiskLevel(risk);
         rec.setSoilMoistureStatus(soilStatus);
         rec.setIrrigationAdvice(irrigationAdvice);
-        rec.setExplanation("Препораката е изведена со AI-анализа на погодноста на културите според почвата на парцелата, "
-                + "просечната температура (" + round(data.getTemperature()) + "°C), "
-                + "очекувани врнежи за 7 дена (" + round(data.getPrecipitation() * 7) + " mm), "
-                + "евапотранспирација (" + round(data.getEvapotranspiration()) + " mm/ден) и "
-                + "влажност на почвата, со воден биланс приближно " + round(balance) + " mm. "
-                + "Почва: " + (parcel.getSoilType() != null ? parcel.getSoilType() : "ненаведена")
-                + ". Податоци за времето: Open-Meteo.");
+        rec.setExplanation("Препораката е генерирана од ML модел обучен на FAOSTAT (принос/производство) и климатски податоци (Open‑Meteo), "
+                + "со споредба со FAO барања по култури. Ако сервисот за ML не е достапен, прикажана е основна препорака.");
         return rec;
     }
 

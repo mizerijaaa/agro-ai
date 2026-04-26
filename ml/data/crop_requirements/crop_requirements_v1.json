@@ -1,0 +1,59 @@
+{
+  "version": "1.0",
+  "crops": [
+    {
+      "crop_id": "wheat",
+      "display_name": "Wheat",
+      "optimal_temperature_c": { "min": 15, "max": 20 },
+      "absolute_temperature_c": { "min": 5, "max": 30 },
+      "seasonal_water_need_mm": 450,
+      "drought_sensitivity": "medium",
+      "notes_source": "FAO wheat crop requirements"
+    },
+    {
+      "crop_id": "maize",
+      "display_name": "Maize",
+      "optimal_temperature_c": { "min": 18, "max": 27 },
+      "absolute_temperature_c": { "min": 10, "max": 35 },
+      "seasonal_water_need_mm": 600,
+      "drought_sensitivity": "high",
+      "notes_source": "FAO maize crop requirements"
+    },
+    {
+      "crop_id": "sunflower",
+      "display_name": "Sunflower",
+      "optimal_temperature_c": { "min": 20, "max": 30 },
+      "absolute_temperature_c": { "min": 8, "max": 35 },
+      "seasonal_water_need_mm": 400,
+      "drought_sensitivity": "low",
+      "notes_source": "FAO sunflower crop requirements"
+    },
+    {
+      "crop_id": "barley",
+      "display_name": "Barley",
+      "optimal_temperature_c": { "min": 12, "max": 18 },
+      "absolute_temperature_c": { "min": 2, "max": 28 },
+      "seasonal_water_need_mm": 350,
+      "drought_sensitivity": "low",
+      "notes_source": "FAO barley crop requirements"
+    },
+    {
+      "crop_id": "tomato",
+      "display_name": "Tomato",
+      "optimal_temperature_c": { "min": 20, "max": 28 },
+      "absolute_temperature_c": { "min": 12, "max": 35 },
+      "seasonal_water_need_mm": 700,
+      "drought_sensitivity": "high",
+      "notes_source": "FAO tomato crop requirements"
+    },
+    {
+      "crop_id": "pepper_green",
+      "display_name": "Green Pepper",
+      "optimal_temperature_c": { "min": 20, "max": 30 },
+      "absolute_temperature_c": { "min": 15, "max": 35 },
+      "seasonal_water_need_mm": 650,
+      "drought_sensitivity": "medium",
+      "notes_source": "FAO pepper crop requirements"
+    }
+  ]
+}

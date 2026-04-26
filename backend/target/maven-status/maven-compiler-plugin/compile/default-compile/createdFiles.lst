@@ -1,9 +1,10 @@
 com/uiktp/agro/service/ParcelImportService$ImportRowPreview.class
 com/uiktp/agro/api/ParcelImportController$CommitRequest.class
 com/uiktp/agro/service/ParcelImportService.class
-com/uiktp/agro/api/ParcelImportController$RowResult.class
+com/uiktp/agro/service/MlInferenceClient.class
 com/uiktp/agro/service/ParcelImportService$ImportPreviewResponse.class
 com/uiktp/agro/service/ParcelImportService$ImportFieldError.class
-com/uiktp/agro/api/ParcelImportController.class
 com/uiktp/agro/api/ParcelImportController$CommitResponse.class
+com/uiktp/agro/api/ParcelImportController$RowResult.class
+com/uiktp/agro/api/ParcelImportController.class
 com/uiktp/agro/service/ParcelImportService$ParcelDraft.class

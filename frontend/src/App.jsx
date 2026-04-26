@@ -748,6 +748,9 @@ function ParcelEditPage({ profile, updateParcel, savingParcel }) {
     return <AppShell title="Уреди парцела" subtitle="Се вчитува…" profile={profile}><p className="muted">Се вчитува…</p></AppShell>;
   }
 
+  const parsedLat = parseCoordInput(form.latitude);
+  const parsedLon = parseCoordInput(form.longitude);
+
   return (
     <AppShell title="Уреди парцела" subtitle="Зачувај ги измените" profile={profile}>
       <form onSubmit={submit} className="add-parcel-page">
@@ -764,8 +767,8 @@ function ParcelEditPage({ profile, updateParcel, savingParcel }) {
             </label>
           </div>
           <ParcelMapPicker
-            lat={parseCoordInput(form.latitude)}
-            lon={parseCoordInput(form.longitude)}
+            lat={parsedLat}
+            lon={parsedLon}
             onPick={(la, lo) => {
               setForm((prev) => ({ ...prev, latitude: String(la), longitude: String(lo) }));
             }}
@@ -1810,8 +1813,20 @@ function Dashboard() {
   };
 
   const generate = async (parcelId) => {
-    await api(`/recommendations/generate/${parcelId}`, { method: "POST" });
-    load();
+    try {
+      await api(`/recommendations/generate/${parcelId}`, { method: "POST" });
+      await load();
+      setError("");
+    } catch (err) {
+      const detail = err?.message || String(err);
+      setError(
+        /401|403/.test(detail)
+          ? "Најави се повторно (токенот е застарен или невалиден)."
+          : /502|Bad Gateway|ML service/i.test(detail)
+            ? "AI сервисот не е достапен. Стартувај го ML inference сервисот (порт 8090) и пробај повторно."
+            : `Анализата не успеа: ${detail}`,
+      );
+    }
   };
 
   const deleteParcel = async (parcelId) => {

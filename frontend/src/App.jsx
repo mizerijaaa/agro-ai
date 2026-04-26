@@ -2,6 +2,7 @@ import { NavLink, Navigate, Route, Routes, useLocation, useNavigate, useParams, 
 import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { api, apiDownload, apiForm } from "./services/api";
 import { downloadReportPdf } from "./utils/downloadReportPdf";
+import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -110,6 +111,33 @@ function parseCoordInput(raw) {
   if (t === "") return null;
   const n = parseFloat(t.replace(",", "."), 10);
   return Number.isFinite(n) ? n : null;
+}
+
+function MapClickMarker({ lat, lon, onPick }) {
+  useMapEvents({
+    click(e) {
+      onPick?.(e.latlng?.lat, e.latlng?.lng);
+    },
+  });
+  if (lat == null || lon == null) return null;
+  return <Marker position={[lat, lon]} />;
+}
+
+function ParcelMapPicker({ lat, lon, onPick }) {
+  const has = lat != null && lon != null;
+  const center = has ? [lat, lon] : [41.9981, 21.4254]; // Skopje as sensible default
+  return (
+    <div className="parcel-map">
+      <MapContainer center={center} zoom={has ? 13 : 9} scrollWheelZoom className="parcel-map__inner">
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <MapClickMarker lat={lat} lon={lon} onPick={onPick} />
+      </MapContainer>
+      <div className="muted parcel-map__hint">Кликнете на мапата за да се постави маркер и автоматски да се пополнат координатите.</div>
+    </div>
+  );
 }
 
 /** history е по createdAt desc — прва појава по parcelId = најнова анализа за таа парцела. */
@@ -735,6 +763,13 @@ function ParcelEditPage({ profile, updateParcel, savingParcel }) {
               <input type="text" inputMode="decimal" required value={form.longitude} onChange={(e) => setForm({ ...form, longitude: e.target.value })} />
             </label>
           </div>
+          <ParcelMapPicker
+            lat={parseCoordInput(form.latitude)}
+            lon={parseCoordInput(form.longitude)}
+            onPick={(la, lo) => {
+              setForm((prev) => ({ ...prev, latitude: String(la), longitude: String(lo) }));
+            }}
+          />
         </section>
         <section className="card add-section">
           <h3>Детали</h3>
@@ -936,6 +971,13 @@ function ParcelsPage({ parcels, history, addParcel, deleteParcel, savingParcel, 
                 <small className="muted">Скопје-регион: ширина ∼40–42°, должина ∼20–23° (од Google Maps).</small>
               </label>
             </div>
+            <ParcelMapPicker
+              lat={parseCoordInput(form.latitude)}
+              lon={parseCoordInput(form.longitude)}
+              onPick={(la, lo) => {
+                setForm((prev) => ({ ...prev, latitude: String(la), longitude: String(lo) }));
+              }}
+            />
           </section>
 
           <section className="card add-section">

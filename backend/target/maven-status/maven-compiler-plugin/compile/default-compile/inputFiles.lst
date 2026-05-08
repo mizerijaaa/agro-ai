@@ -24,6 +24,5 @@
 /Users/milagjorgoska/Downloads/agro-ai-main/backend/src/main/java/com/uiktp/agro/service/CropSuitabilityService.java
 /Users/milagjorgoska/Downloads/agro-ai-main/backend/src/main/java/com/uiktp/agro/service/CurrentUserService.java
 /Users/milagjorgoska/Downloads/agro-ai-main/backend/src/main/java/com/uiktp/agro/service/JwtService.java
-/Users/milagjorgoska/Downloads/agro-ai-main/backend/src/main/java/com/uiktp/agro/service/MlInferenceClient.java
 /Users/milagjorgoska/Downloads/agro-ai-main/backend/src/main/java/com/uiktp/agro/service/ParcelImportService.java
 /Users/milagjorgoska/Downloads/agro-ai-main/backend/src/main/java/com/uiktp/agro/service/RecommendationService.java

@@ -27,10 +27,6 @@ public class Recommendation {
     @Column(name = "crop_rankings_json", length = 4000)
     private String cropRankingsJson;
 
-    /** JSON from data-driven ML inference (ranked crops + explanations). */
-    @Column(name = "ml_output_json", length = 12000)
-    private String mlOutputJson;
-
     private Instant createdAt = Instant.now();
 
     public Long getId() { return id; }
@@ -70,8 +66,6 @@ public class Recommendation {
     public void setExplanation(String explanation) { this.explanation = explanation; }
     public String getCropRankingsJson() { return cropRankingsJson; }
     public void setCropRankingsJson(String cropRankingsJson) { this.cropRankingsJson = cropRankingsJson; }
-    public String getMlOutputJson() { return mlOutputJson; }
-    public void setMlOutputJson(String mlOutputJson) { this.mlOutputJson = mlOutputJson; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }

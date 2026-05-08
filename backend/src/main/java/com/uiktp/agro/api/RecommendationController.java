@@ -125,8 +125,7 @@ public class RecommendationController {
                 p.getAreaHa(),
                 p.getLatitude(),
                 p.getLongitude(),
-                climate,
-                rec.getMlOutputJson());
+                climate);
     }
 
     public record RecommendationResponse(
@@ -147,7 +146,6 @@ public class RecommendationController {
             Double parcelAreaHa,
             Double parcelLatitude,
             Double parcelLongitude,
-            ReportClimateSnapshot climate,
-            String mlOutputJson) {
+            ReportClimateSnapshot climate) {
     }
 }

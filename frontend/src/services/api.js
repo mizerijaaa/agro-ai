@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = "https://agro-ai-q0l7.onrender.com/api";
 
 export async function api(path, options = {}) {
   const token = localStorage.getItem("token");
